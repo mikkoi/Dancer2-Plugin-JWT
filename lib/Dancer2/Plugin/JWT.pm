@@ -10,7 +10,7 @@ use Crypt::JWT qw(encode_jwt decode_jwt);
 use URI;
 use URI::QueryParam;
 
-register_hook qw(jwt_exception);
+plugin_hooks qw(jwt_exception);
 
 my $fourWeeks = 4 * 24 * 60 * 60;
 my $DEFAULT_SET_AUTHORIZATION_HEADER = 1;
@@ -31,20 +31,21 @@ my $expose_authorization_header = undef;
 my $set_cookie_header = undef;
 my $set_location_header = undef;
 
-register jwt => sub {
-    my $dsl = shift;
-    my @args = @_;
+plugin_keywords
+    jwt => sub {
+        my $dsl = shift;
+        my @args = @_;
 
-    if (@args) {
-      $dsl->app->request->var(jwt => $args[0]);
-    }
-    else {
-      if ($dsl->app->request->var('jwt_status') eq 'missing') {
-          $dsl->app->execute_hook('plugin.jwt.jwt_exception' => 'No JWT is present');
-      }
-    }
-    return $dsl->app->request->var('jwt') || undef;
-};
+        if (@args) {
+          $dsl->app->request->var(jwt => $args[0]);
+        }
+        else {
+          if ($dsl->app->request->var('jwt_status') eq 'missing') {
+              $dsl->app->execute_plugin_hook('jwt_exception' => 'No JWT is present');
+          }
+        }
+        return $dsl->app->request->var('jwt') || undef;
+    };
 
 on_plugin_import {
     my $dsl = shift;
@@ -224,7 +225,7 @@ on_plugin_import {
                                                accepted_enc => $enc );
                     };
                     if ($@) {
-                        $app->execute_hook('plugin.jwt.jwt_exception' => ($a = $@));  # this is weird, but required!
+                        $app->execute_plugin_hook('jwt_exception' => ($a = $@));  # this is weird, but required!
                     };
                     $app->request->var('jwt', $decoded);
                     $app->request->var('jwt_status' => 'present');
@@ -284,8 +285,6 @@ on_plugin_import {
 };
 
 
-
-register_plugin;
 
 1;
 
