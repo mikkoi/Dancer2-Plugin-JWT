@@ -43,11 +43,12 @@ plugin_keywords
         }
         else {
           if ($plugin->app->request->var('jwt_status') eq 'missing') {
-              $plugin->app->execute_plugin_hook('jwt_exception' => 'No JWT is present');
+              $plugin->execute_plugin_hook('jwt_exception' => 'No JWT is present');
           }
         }
         return $plugin->app->request->var('jwt') || undef;
-    };
+    },
+;
 
 sub BUILD {
     my $plugin = shift;
@@ -227,7 +228,7 @@ sub BUILD {
                                                accepted_enc => $enc );
                     };
                     if ($@) {
-                        $app->execute_plugin_hook('jwt_exception' => ($a = $@));  # this is weird, but required!
+                        $plugin->execute_plugin_hook('jwt_exception' => ($a = $@));  # this is weird, but required!
                     };
                     $app->request->var('jwt', $decoded);
                     $app->request->var('jwt_status' => 'present');
