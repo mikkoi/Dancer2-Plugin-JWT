@@ -49,7 +49,7 @@ plugin_keywords
         return $plugin->app->request->var('jwt') || undef;
     };
 
-on_plugin_import {
+sub BUILD {
     my $plugin = shift;
 
     my $config = plugin_setting;
@@ -284,7 +284,8 @@ on_plugin_import {
             }
         )
     );
-};
+    return;
+}
 
 
 
