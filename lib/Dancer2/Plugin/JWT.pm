@@ -52,7 +52,7 @@ plugin_keywords
 sub BUILD {
     my $plugin = shift;
 
-    my $config = plugin_setting;
+    my $config = $plugin->config;
     die 'JWT cannot be used without a secret!' unless exists $config->{secret} and defined $config->{secret};
     # For RSA and ES algorithms - path to keyfile or JWK string, others algorithms - just secret string
     $secret = $config->{secret};
