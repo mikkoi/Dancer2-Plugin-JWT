@@ -10,8 +10,6 @@ use Crypt::JWT qw(encode_jwt decode_jwt);
 use URI;
 use URI::QueryParam;
 
-plugin_hooks qw(jwt_exception);
-
 my $fourWeeks = 4 * 24 * 60 * 60;
 my $DEFAULT_SET_AUTHORIZATION_HEADER = 1;
 my $DEFAULT_EXPOSE_AUTHORIZATION_HEADER = 1;
@@ -30,6 +28,10 @@ my $set_authorization_header = undef;
 my $expose_authorization_header = undef;
 my $set_cookie_header = undef;
 my $set_location_header = undef;
+
+plugin_hooks qw(
+    jwt_exception
+);
 
 plugin_keywords
     jwt => sub {
