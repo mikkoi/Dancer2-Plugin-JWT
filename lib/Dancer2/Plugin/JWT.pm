@@ -35,22 +35,22 @@ plugin_hooks qw(
 
 plugin_keywords
     jwt => sub {
-        my $dsl = shift;
+        my $plugin = shift;
         my @args = @_;
 
         if (@args) {
-          $dsl->app->request->var(jwt => $args[0]);
+          $plugin->app->request->var(jwt => $args[0]);
         }
         else {
-          if ($dsl->app->request->var('jwt_status') eq 'missing') {
-              $dsl->app->execute_plugin_hook('jwt_exception' => 'No JWT is present');
+          if ($plugin->app->request->var('jwt_status') eq 'missing') {
+              $plugin->app->execute_plugin_hook('jwt_exception' => 'No JWT is present');
           }
         }
-        return $dsl->app->request->var('jwt') || undef;
+        return $plugin->app->request->var('jwt') || undef;
     };
 
 on_plugin_import {
-    my $dsl = shift;
+    my $plugin = shift;
 
     my $config = plugin_setting;
     die 'JWT cannot be used without a secret!' unless exists $config->{secret} and defined $config->{secret};
@@ -168,17 +168,17 @@ on_plugin_import {
         $need_leeway = $config->{need_leeway};
     }
 
-    $dsl->app->add_hook(
+    $plugin->app->add_hook(
         Dancer2::Core::Hook->new(
             name => 'before_template_render',
             code => sub {
                 my $tokens = shift;
-                $tokens->{jwt} = $dsl->app->request->var('jwt');
+                $tokens->{jwt} = $plugin->app->request->var('jwt');
             }
         )
     );
 
-    $dsl->app->add_hook(
+    $plugin->app->add_hook(
         Dancer2::Core::Hook->new(
             name => 'after',
             code => sub {
@@ -191,7 +191,7 @@ on_plugin_import {
         )
     );
 
-    $dsl->app->add_hook(
+    $plugin->app->add_hook(
         Dancer2::Core::Hook->new(
             name => 'before',
             code => sub {
@@ -241,12 +241,12 @@ on_plugin_import {
         )
     );
 
-    $dsl->app->add_hook(
+    $plugin->app->add_hook(
         Dancer2::Core::Hook->new(
             name => 'after',
             code => sub {
                 my $response = shift;
-                my $decoded = $dsl->app->request->var('jwt');
+                my $decoded = $plugin->app->request->var('jwt');
                 if($set_authorization_header || $set_cookie_header || $set_location_header) {
                     # If all are disabled, then skip also encoding!
                     if (defined($decoded)) {
